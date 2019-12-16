@@ -68,11 +68,14 @@ class LogicHDHomerun(object):
         return ret
 
     @staticmethod
-    def channel_list():
+    def channel_list(only_use=False):
         try:
             query = db.session.query(ModelHDHomerunChannel)
+            if only_use:
+                query = query.filter_by(use=False)
             query = query.order_by(ModelHDHomerunChannel.ch_number)
             query = query.order_by(ModelHDHomerunChannel.id)
+
             return  query.all()
             #return [item.as_dict() for item in lists]
         except Exception as e: 
@@ -182,11 +185,16 @@ class LogicHDHomerun(object):
     @staticmethod
     def get_m3u():
         try:
+            data = LogicHDHomerun.channel_list()
+            for i in data:
+                i.set_url('192.168.0.69')
+            db.session.commit()
+
+
             M3U_FORMAT = '#EXTINF:-1 tvg-id=\"%s\" tvg-name=\"%s\" tvg-chno=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n'
 
             m3u = '#EXTM3U\n'
-            data = LogicHDHomerun.channel_list()
-            
+            data = LogicHDHomerun.channel_list(only_use=True)
             for c in data:
                 try:
                     import epg

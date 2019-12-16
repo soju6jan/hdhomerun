@@ -221,7 +221,7 @@ def proxy(sub):
     elif sub == 'lineup.json':
         try:
             lineup = []
-            channel_list = LogicHDHomerun.channel_list()
+            channel_list = LogicHDHomerun.channel_list(only_use=True)
             import system
             ddns = system.SystemLogic.get_setting_value('ddns')
             for c in channel_list:
