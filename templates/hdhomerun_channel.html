@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+{% block content %}
+<style type="text/css">
+  .my_hover:hover{
+    background-color: #ffff00;
+    transition: all 0.01s ease-in-out;
+  }
+</style>
+
+<div>
+  {{ macros.m_button_group([['load_data_btn', '데이터 파일에서 읽기'], ['epg_channel_btn', 'EPG  채널 목록'], ['auto_channel_number_btn', '현재 순서대로 채널 번호 부여'], ['group_sort_btn', '그룹별 정렬'], ['save_btn', '저장']])}}
+  {{ macros.select('view_mode', [['all', '전체 채널'],['no_epg', '사용중 채널 중 EPG 매칭 안 된 채널'], ['use', '사용 채널'],['use_false', '미사용 채널']]) }}
+
+
+  {{ macros.m_row_start('0') }}
+  {{ macros.m_row_end() }}
+
+  {{ macros.m_hr_head_top() }}
+  {{ macros.m_row_start('0') }}
+  {{ macros.m_col(2,  macros.m_strong('설정 / VID')) }}
+  {{ macros.m_col(1,  macros.m_strong('번호')) }}
+  {{ macros.m_col(2,  macros.m_strong('이름(화면)')) }}
+  {{ macros.m_col(1,  macros.m_strong('EPG검색')) }}
+  {{ macros.m_col(1,  macros.m_strong('EPG')) }}
+  {{ macros.m_col(1,  macros.m_strong('Group')) }}
+  {{ macros.m_col(4,  macros.m_strong('Action')) }}
+  {{ macros.m_row_end() }}
+  {{ macros.m_hr_head_bottom() }}
+  <form id="custom_form" name="custom_form">
+  <div id="list_div"></div>
+  </form>
+</div>
+
+<script type="text/javascript">
+var package_name = 'hdhomerun';
+var current_data = null;
+//var ddns = "{{arg['ddns']}}"
+var current_view_mode = 'all'
+
+$(document).ready(function(){
+  $.ajax({
+    url: '/' + package_name + '/ajax/load_db',
+    type: "POST", 
+    cache: false,
+    data: {},
+    dataType: "json",
+    success: function (data) {
+      current_data = data
+      make_list()
+    }
+  });
+});
+
+
+$("body").on('click', '#load_data_btn', function(e){
+  e.preventDefault();
+  document.getElementById("confirm_title").innerHTML = "데이터 로드";
+  document.getElementById("confirm_body").innerHTML = "데이터 로드시 기존 채널 정보는 모두 초기화됩니다.<br>진행 하시겠습니까?";
+  $('#confirm_button').attr('onclick', "load_data();");
+  $("#confirm_modal").modal();
+  return;
+});
+  
+function load_data() {
+  $.ajax({
+    url: '/' + package_name + '/ajax/load_data',
+    type: "POST", 
+    cache: false,
+    data: {},
+    dataType: "json",
+    success: function (data) {
+      console.log(data)
+      current_data = data
+      make_list()
+    }
+  });
+}
+
+
+
+$("body").on('click', '#epg_channel_btn', function(e){
+  e.preventDefault();
+  var formData = get_formdata('#custom_form');
+  $.ajax({
+    url: '/epg/ajax/channel_list',
+    type: "POST", 
+    cache: false,
+    data:formData,
+    dataType: "json",
+    success: function (data) {
+      m_modal(data, 'EPG 채널 목록')
+    }
+  });
+});
+
+
+
+$("body").on('change', '#view_mode', function(e){
+  e.preventDefault();
+  current_view_mode = document.getElementById("view_mode").value;
+  console.log(current_view_mode)
+  make_list()
+});
+
+
+$("body").on('click', '#clipboard_copy_btn', function(e){
+  e.preventDefault();
+  var copyText = $(this).data('url')
+  var tempElem = document.createElement('textarea');
+  tempElem.value = copyText;
+  document.body.appendChild(tempElem);
+
+  tempElem.select();
+  document.execCommand("copy");
+  document.body.removeChild(tempElem);
+  $.notify('<strong>주소를 클립보드에 복사하였습니다.</strong>', {
+    type: 'success'
+  });
+});
+
+
+
+$("body").on('click', '#group_sort_btn', function(e){
+  e.preventDefault();
+  $.ajax({
+    url: '/' + package_name + '/ajax/group_sort',
+    type: "POST", 
+    cache: false,
+    data: {},
+    dataType: "json",
+    success: function (data) {
+      current_data = data
+      make_list()
+    }
+  });
+});
+
+
+// 자동채널번호 부여
+$("body").on('click', '#auto_channel_number_btn', function(e){
+  e.preventDefault();
+  /*
+  setTimeout(function() {
+	  data = current_data.data
+    no = 1
+    for(i in data) {
+      data[i].ch_number = no
+      no += 1
+    }
+    make_list()
+  }, 100);
+  */
+  data = current_data.data
+  no = 1
+  for(i in data) {
+    data[i].ch_number = no
+    no += 1
+  }
+  make_list()
+  $.notify('<strong>작업완료</strong>', {
+    type: 'success'
+  });
+  
+});
+
+
+
+$("body").on('click', '#up_btn', function(e){
+  e.preventDefault();
+  target_id = $(this).data('index')
+  target = current_data.data[target_id]
+  if (target_id != 0) {
+    current_data.data.splice(target_id, 1);
+    current_data.data.splice(target_id-1, 0, target);
+  }
+  make_list()
+});
+
+$("body").on('click', '#down_btn', function(e){
+  e.preventDefault();
+  target_id = $(this).data('index')
+  target = current_data.data[target_id]
+  if (current_data.data.length -1 != target_id) {
+    current_data.data.splice(target_id, 1);
+    current_data.data.splice(target_id+1, 0, target);
+  }
+  make_list()
+});
+
+
+$("body").on('click', '#save_btn', function(e){
+  e.preventDefault();
+  var formData = get_formdata('#custom_form');
+  $.ajax({
+    url: '/' + package_name + '/ajax/save',
+    type: "POST", 
+    cache: false,
+    data:formData,
+    dataType: "json",
+    success: function (data) {
+      if (data) {
+        $.notify('<strong>저장하였습니다.</strong>', {
+          type: 'success'
+        });
+        current_data = data;
+        make_list(data, 'saved')
+      } else {
+        $.notify('<strong>실패</strong><br>'+data.data, {
+          type: 'warning'
+        });
+      }
+    }
+  });
+});
+
+
+$("body").on('click', '#match_for_epg_name_btn', function(e){
+  e.preventDefault();
+  index = $(this).data('index')
+  id = $(this).data('id')
+  for_epg_name = document.getElementById("for_epg_name|"+id).value
+
+  $.ajax({
+    url: '/' + package_name + '/ajax/match_for_epg_name',
+    type: "POST", 
+    cache: false,
+    data:{id:id, for_epg_name:for_epg_name},
+    dataType: "json",
+    success: function (data) {
+      if (data.ret == 'success') {
+        $.notify('<strong>매칭되었습니다.</strong>', {
+          type: 'success'
+        });
+        current_data.data[index].match_epg_name = data.match_epg_name
+        current_data.data[index].group_name = data.group_name
+        document.getElementById("match_epg_name|"+id).value = data.match_epg_name
+        document.getElementById("group_name|"+id).value = data.group_name
+      } else {
+        $.notify('<strong>'+data.ret+'</strong>', {
+          type: 'warning'
+        });
+      }
+    }
+  });
+});
+
+$("body").on('click', '#delete_btn', function(e){
+  e.preventDefault();
+  id = $(this).data('id')
+
+  $.ajax({
+    url: '/' + package_name + '/ajax/delete',
+    type: "POST", 
+    cache: false,
+    data:{id:id},
+    dataType: "json",
+    success: function (data) {
+      if (data.ret == 'success') {
+        $.notify('<strong>삭제되었습니다.</strong>', {
+          type: 'success'
+        });
+        current_data = data
+        make_list()
+      } else {
+        $.notify('<strong>'+data.ret+'</strong>', {
+          type: 'warning'
+        });
+      }
+    }
+  });
+});
+
+
+
+
+
+function make_list() {
+  str = '';
+  //channel_number = 0
+  data = current_data.data
+  for (i in data) {
+    if (current_view_mode == 'use') {
+      if (data[i].use == false) continue
+    } else if (current_view_mode == 'use_false') {
+      if (data[i].use) continue
+    } else if (current_view_mode == 'no_epg') {
+      if (data[i].use == false) continue
+      if (data[i].match_epg_name != '') continue
+    }
+    str += m_row_start(5);
+
+    tmp2 = ((data[i].use) ? "checked" : "");
+    tmp = '<input id="use_checkbox|'+data[i].id+'" name="use_checkbox|'+data[i].id+'" type="checkbox" data-toggle="toggle" data-on="사용" data-off="-" data-onstyle="info" data-offstyle="danger" data-size="small" '+tmp2+'>&nbsp;&nbsp;'
+    
+    tmp2 = ((data[i].use_vid) ? "checked" : "");
+    tmp += '<input id="use_vid_checkbox|'+data[i].id+'" name="use_vid_checkbox|'+data[i].id+'" type="checkbox" data-toggle="toggle" data-on="vid" data-off=".mpeg" data-onstyle="danger" data-offstyle="info" data-size="small" '+tmp2+'>&nbsp;&nbsp;'
+    tmp +=  data[i].scan_vid
+    str += m_col2(2, tmp);
+
+
+    tmp = '<input id="ch_number|'+data[i].id+'" name="ch_number|'+data[i].id +'"  class="form-control form-control-sm w-100" min="1" type="number" value="'+ data[i].ch_number +'">'
+    str += m_col2(1, tmp);
+
+    
+    //str += m_col2(1, data[i].ch_type)
+    tmp = '<input id="scan_name|'+data[i].id+'" name="scan_name|'+data[i].id +'"  class="form-control form-control-sm w-100" type="text" value="'+ data[i].scan_name +'">'
+    str += m_col2(2, tmp)
+
+    tmp = '<input id="for_epg_name|'+data[i].id+'" name="for_epg_name|'+data[i].id +'"  class="form-control form-control-sm w-100" type="text" value="'+ data[i].for_epg_name +'">'
+    str += m_col2(2, tmp, 'center')
+
+    
+    //str += m_col2(1, data[i].scan_frequency)
+    //str += m_col2(1, data[i].scan_program)
+
+    if (data[i].match_epg_name=='') {
+      //tmp = '<span style="color:red">[NO EPG]</span>'
+      tmp = '[NO EPG]'
+    } else {
+      tmp = data[i].match_epg_name
+    }
+    tmp = '<input id="match_epg_name|'+data[i].id+'" name="match_epg_name|'+data[i].id +'"  class="form-control form-control-sm w-100" type="text" value="'+ tmp +'" disabled>'
+    str += m_col2(1, tmp, 'center')
+
+    tmp = '<input id="group_name|'+data[i].id+'" name="group_name|'+data[i].id +'"  class="form-control form-control-sm w-100" type="text" value="'+ data[i].group_name +'">'
+    str += m_col2(1, tmp, 'center')
+
+    tmp = ''
+    
+    tmp += m_button('match_for_epg_name_btn', 'EPG 찾기', [{'key':'index', 'value':i}, {'key':'id', 'value':data[i].id}])
+    tmp += m_button('clipboard_copy_btn', 'URL', [{'key':'url', 'value':data[i].url}])
+    //tmp += m_button('view_btn', 'Play', [{'key':'url', 'value':data[i].url}])
+    tmp += m_button('delete_btn', '삭제', [{'key':'id', 'value':data[i].id}])
+
+
+    tmp += m_button('up_btn', 'UP', [{'key':'index', 'value':i}]);
+    tmp += m_button('down_btn', 'DOWN', [{'key':'index', 'value':i}]);
+    //tmp += m_button('delete_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
+    //url = ddns + "/klive/api/url.m3u8?m=web_play&s=" + data[i].source + "&i=" + data[i].source_id + '&q=' + data[i].quality
+    //tmp += m_button('global_link_btn', 'Open', [{'key':'url', 'value':url}]);
+    tmp = m_button_group(tmp)
+    
+    str += m_col2(3, tmp, 'right')
+
+    str += m_row_end();
+    if (i != data.length -1) str += m_hr(0);
+  }
+  document.getElementById("list_div").innerHTML = str;
+  $('input[id^="use_checkbox|"]').bootstrapToggle()
+  $('input[id^="use_vid_checkbox|"]').bootstrapToggle()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>    
+{% endblock %}
