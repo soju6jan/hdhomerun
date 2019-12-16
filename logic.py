@@ -25,7 +25,7 @@ from .model import ModelSetting
 class Logic(object):
     db_default = {
         'data_filename' : os.path.join(path_data, 'db', 'hdhomerun.txt'),
-        'group_sort' : u'고정, 지상파, 종합편성, 뉴스/경제, 스포츠, 영화, 연예/오락, 드라마, 다큐, 교양, 음악, 레저, 만화, 어린이, 교육, 여성/패션, 공공, 종교, 홈쇼핑, 해외위성, 라디오, 기타',
+        'group_sort' : u'TOP, 지상파, 종합편성, 뉴스/경제, 스포츠, 영화, 연예/오락, 드라마, 다큐, 교양, 음악, 레저, 만화, 어린이, 교육, 여성/패션, 공공, 종교, 홈쇼핑, 해외위성, 라디오, 기타',
         'deviceid' : ''
     }
     
@@ -54,7 +54,6 @@ class Logic(object):
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-
 
     @staticmethod
     def plugin_unload():

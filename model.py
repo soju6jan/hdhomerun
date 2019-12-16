@@ -168,8 +168,6 @@ class ModelHDHomerunChannel(db.Model):
         else:
             self.url = 'http://%s:5004/auto/ch%s-%s.mpeg' % (deviceid, self.scan_frequency, self.scan_program)
 
-
-
     def as_dict(self):
         ret = {x.name: getattr(self, x.name) for x in self.__table__.columns}
         ret['created_time'] = self.created_time.strftime('%m-%d %H:%M:%S') if ret['created_time'] is not None else None

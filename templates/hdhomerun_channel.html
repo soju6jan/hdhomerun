@@ -1,16 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<style type="text/css">
-  .my_hover:hover{
-    background-color: #ffff00;
-    transition: all 0.01s ease-in-out;
-  }
-</style>
-
 <div>
   {{ macros.m_button_group([['load_data_btn', '데이터 파일에서 읽기'], ['epg_channel_btn', 'EPG  채널 목록'], ['auto_channel_number_btn', '현재 순서대로 채널 번호 부여'], ['group_sort_btn', '그룹별 정렬'], ['save_btn', '저장']])}}
   {{ macros.select('view_mode', [['all', '전체 채널'],['no_epg', '사용중 채널 중 EPG 매칭 안 된 채널'], ['use', '사용 채널'],['use_false', '미사용 채널']]) }}
-
 
   {{ macros.m_row_start('0') }}
   {{ macros.m_row_end() }}
@@ -34,7 +26,6 @@
 <script type="text/javascript">
 var package_name = 'hdhomerun';
 var current_data = null;
-//var ddns = "{{arg['ddns']}}"
 var current_view_mode = 'all'
 
 $(document).ready(function(){
@@ -69,13 +60,11 @@ function load_data() {
     data: {},
     dataType: "json",
     success: function (data) {
-      console.log(data)
       current_data = data
       make_list()
     }
   });
 }
-
 
 
 $("body").on('click', '#epg_channel_btn', function(e){
@@ -94,11 +83,9 @@ $("body").on('click', '#epg_channel_btn', function(e){
 });
 
 
-
 $("body").on('change', '#view_mode', function(e){
   e.preventDefault();
   current_view_mode = document.getElementById("view_mode").value;
-  console.log(current_view_mode)
   make_list()
 });
 
@@ -109,7 +96,6 @@ $("body").on('click', '#clipboard_copy_btn', function(e){
   var tempElem = document.createElement('textarea');
   tempElem.value = copyText;
   document.body.appendChild(tempElem);
-
   tempElem.select();
   document.execCommand("copy");
   document.body.removeChild(tempElem);
@@ -117,7 +103,6 @@ $("body").on('click', '#clipboard_copy_btn', function(e){
     type: 'success'
   });
 });
-
 
 
 $("body").on('click', '#group_sort_btn', function(e){
@@ -136,7 +121,6 @@ $("body").on('click', '#group_sort_btn', function(e){
 });
 
 
-// 자동채널번호 부여
 $("body").on('click', '#auto_channel_number_btn', function(e){
   e.preventDefault();
   /*
@@ -160,9 +144,7 @@ $("body").on('click', '#auto_channel_number_btn', function(e){
   $.notify('<strong>작업완료</strong>', {
     type: 'success'
   });
-  
 });
-
 
 
 $("body").on('click', '#up_btn', function(e){
@@ -175,6 +157,7 @@ $("body").on('click', '#up_btn', function(e){
   }
   make_list()
 });
+
 
 $("body").on('click', '#down_btn', function(e){
   e.preventDefault();
@@ -244,10 +227,10 @@ $("body").on('click', '#match_for_epg_name_btn', function(e){
   });
 });
 
+
 $("body").on('click', '#delete_btn', function(e){
   e.preventDefault();
   id = $(this).data('id')
-
   $.ajax({
     url: '/' + package_name + '/ajax/delete',
     type: "POST", 
@@ -271,12 +254,8 @@ $("body").on('click', '#delete_btn', function(e){
 });
 
 
-
-
-
 function make_list() {
   str = '';
-  //channel_number = 0
   data = current_data.data
   for (i in data) {
     if (current_view_mode == 'use') {
@@ -291,30 +270,21 @@ function make_list() {
 
     tmp2 = ((data[i].use) ? "checked" : "");
     tmp = '<input id="use_checkbox|'+data[i].id+'" name="use_checkbox|'+data[i].id+'" type="checkbox" data-toggle="toggle" data-on="사용" data-off="-" data-onstyle="info" data-offstyle="danger" data-size="small" '+tmp2+'>&nbsp;&nbsp;'
-    
     tmp2 = ((data[i].use_vid) ? "checked" : "");
     tmp += '<input id="use_vid_checkbox|'+data[i].id+'" name="use_vid_checkbox|'+data[i].id+'" type="checkbox" data-toggle="toggle" data-on="vid" data-off=".mpeg" data-onstyle="danger" data-offstyle="info" data-size="small" '+tmp2+'>&nbsp;&nbsp;'
     tmp +=  data[i].scan_vid
     str += m_col2(2, tmp);
 
-
     tmp = '<input id="ch_number|'+data[i].id+'" name="ch_number|'+data[i].id +'"  class="form-control form-control-sm w-100" min="1" type="number" value="'+ data[i].ch_number +'">'
     str += m_col2(1, tmp);
 
-    
-    //str += m_col2(1, data[i].ch_type)
     tmp = '<input id="scan_name|'+data[i].id+'" name="scan_name|'+data[i].id +'"  class="form-control form-control-sm w-100" type="text" value="'+ data[i].scan_name +'">'
     str += m_col2(2, tmp)
 
     tmp = '<input id="for_epg_name|'+data[i].id+'" name="for_epg_name|'+data[i].id +'"  class="form-control form-control-sm w-100" type="text" value="'+ data[i].for_epg_name +'">'
     str += m_col2(2, tmp, 'center')
 
-    
-    //str += m_col2(1, data[i].scan_frequency)
-    //str += m_col2(1, data[i].scan_program)
-
     if (data[i].match_epg_name=='') {
-      //tmp = '<span style="color:red">[NO EPG]</span>'
       tmp = '[NO EPG]'
     } else {
       tmp = data[i].match_epg_name
@@ -326,22 +296,13 @@ function make_list() {
     str += m_col2(1, tmp, 'center')
 
     tmp = ''
-    
     tmp += m_button('match_for_epg_name_btn', 'EPG 찾기', [{'key':'index', 'value':i}, {'key':'id', 'value':data[i].id}])
     tmp += m_button('clipboard_copy_btn', 'URL', [{'key':'url', 'value':data[i].url}])
-    //tmp += m_button('view_btn', 'Play', [{'key':'url', 'value':data[i].url}])
     tmp += m_button('delete_btn', '삭제', [{'key':'id', 'value':data[i].id}])
-
-
     tmp += m_button('up_btn', 'UP', [{'key':'index', 'value':i}]);
     tmp += m_button('down_btn', 'DOWN', [{'key':'index', 'value':i}]);
-    //tmp += m_button('delete_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
-    //url = ddns + "/klive/api/url.m3u8?m=web_play&s=" + data[i].source + "&i=" + data[i].source_id + '&q=' + data[i].quality
-    //tmp += m_button('global_link_btn', 'Open', [{'key':'url', 'value':url}]);
     tmp = m_button_group(tmp)
-    
     str += m_col2(3, tmp, 'right')
-
     str += m_row_end();
     if (i != data.length -1) str += m_hr(0);
   }
@@ -349,41 +310,5 @@ function make_list() {
   $('input[id^="use_checkbox|"]').bootstrapToggle()
   $('input[id^="use_vid_checkbox|"]').bootstrapToggle()
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>    
 {% endblock %}

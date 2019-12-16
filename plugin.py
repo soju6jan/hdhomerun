@@ -71,9 +71,9 @@ def first_menu(sub):
             arg = ModelSetting.to_dict()
             import system
             ddns = system.ModelSetting.get('ddns')
-
             arg['m3u'] = '%s/%s/api/m3u' % (ddns, package_name)
             arg['xmltv'] = '%s/epg/xml/%s' % (ddns, package_name)
+            arg['proxy'] = '%s/%s/proxy' % (ddns, package_name)
             return render_template('%s_%s.html' % (package_name, sub), arg=arg)
         except Exception as e: 
             logger.error('Exception:%s', e)
