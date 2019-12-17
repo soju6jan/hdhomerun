@@ -201,7 +201,7 @@ class LogicHDHomerun(object):
                     ins = None
 
                 #m3u += M3U_FORMAT % (c.source+'|' + c.source_id, c.title, c.epg_entity.icon, c.source, c.title, url)
-                m3u += M3U_FORMAT % (c.vid, c.scan_name, c.ch_number, (ins.icon if ins is not None else ""), c.group_name, c.scan_name, c.url)
+                m3u += M3U_FORMAT % (c.id, c.scan_name, c.ch_number, (ins.icon if ins is not None else ""), c.group_name, c.scan_name, c.url)
             
         except Exception as e: 
             logger.error('Exception:%s', e)
