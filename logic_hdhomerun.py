@@ -28,10 +28,14 @@ class LogicHDHomerun(object):
             ret = {}
             if data is not None:
                 data = data.split('\n')
-                logger.debug(data)
-                ModelSetting.set('deviceid', data[0].strip())
                 deviceid = data[0].strip()
+                tmp = deviceid.find('192')
+                deviceid = deviceid[tmp:]
+                
+                ModelSetting.set('deviceid', deviceid)
                 logger.debug('deviceid:%s', deviceid)
+                logger.debug('deviceid:%s', len(deviceid))
+
                 ModelHDHomerunChannel.query.delete()
                 channel_list = []
                 for item in data[1:]:
@@ -203,3 +207,17 @@ class LogicHDHomerun(object):
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
         return m3u
+
+    
+    @staticmethod
+    def ip_fix(deviceid):
+        try:
+            data = LogicHDHomerun.channel_list()
+            for c in data:
+                c.set_url(deviceid)
+            db.session.commit()
+            return True
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            return False

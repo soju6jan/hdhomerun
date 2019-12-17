@@ -176,7 +176,17 @@ def ajax(sub):
             except Exception as e: 
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
-          
+        elif sub == 'ip_fix':
+            try:
+                deviceid = request.form['deviceid']
+                tmp = deviceid.find('192')
+                deviceid = deviceid[tmp:]
+                ModelSetting.set('deviceid', deviceid)
+                ret = LogicHDHomerun.ip_fix(deviceid)
+                return jsonify(ret)
+            except Exception as e: 
+                logger.error('Exception:%s', e)
+                logger.error(traceback.format_exc())
 
 
     except Exception as e: 

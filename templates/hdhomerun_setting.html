@@ -6,6 +6,8 @@
   {{ macros.setting_input_textarea('group_sort', '그룹 정렬 순서', value=arg['group_sort'], desc=['그룹별 정렬 순서']) }}
   {{ macros.setting_button([['global_setting_save_btn', '저장']]) }}
   </form>
+  {{ macros.setting_input_text_and_buttons('deviceid', 'IP', [['ip_fix_btn', 'IP 변경']], value=arg['deviceid']) }}
+  
   {{ macros.m_hr() }}
   {{ macros.info_text_go('m3u', 'M3U', value=arg['m3u'], desc=['HDHomerun 채널에 대한 M3U']) }}
   {{ macros.info_text_go('xmltv', 'XMLTV', value=arg['xmltv'], desc=['HDHomerun EPG']) }}
@@ -31,6 +33,21 @@ $("body").on('click', '#read_data_btn', function(e){
     dataType: "json",
     success: function (data) {
       m_modal(data, '내용')
+    }
+  });
+});
+
+$("body").on('click', '#ip_fix_btn', function(e){
+  e.preventDefault();
+  deviceid = document.getElementById("deviceid").value
+  $.ajax({
+    url: '/' + package_name + '/ajax/ip_fix',
+    type: "POST", 
+    cache: false,
+    data: {deviceid:deviceid},
+    dataType: "json",
+    success: function (data) {
+      m_modal(data, 'Result')
     }
   });
 });
