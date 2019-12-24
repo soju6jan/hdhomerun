@@ -33,7 +33,7 @@ def plugin_load():
 
 def plugin_unload():
     Logic.plugin_unload()
-
+#EXTM3U #EXTINF:-1 tvg-id="41" tvg-name="가이드채널" tvg-chno="1" tvg-logo="" group-title="",가이드채널 http://192.168.0.691:5004/auto/
 plugin_info = {
     'version' : '0.1.0.0',
     'name' : 'HDHomerun',
