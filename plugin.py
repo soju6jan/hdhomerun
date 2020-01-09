@@ -18,7 +18,7 @@ from framework import app, db, scheduler, socketio
 from framework.util import Util, AlchemyEncoder
 
 # 로그
-package_name = __name__.split('.')[0].split('_sjva')[0]
+package_name = __name__.split('.')[0]
 logger = get_logger(package_name)
 
 # 패키지
@@ -41,7 +41,7 @@ plugin_info = {
     'icon' : '',
     'developer' : 'soju6jan',
     'description' : 'TVH 없이 HDHomerun을 이용할 수 있는 플러그인',
-    'home' : 'https://github.com/soju6jan/hdhomerun_sjva',
+    'home' : 'https://github.com/soju6jan/hdhomerun',
     'more' : '',
 }
 #########################################################
