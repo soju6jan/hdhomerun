@@ -88,6 +88,8 @@ class ModelSetting(db.Model):
     def setting_save(req):
         try:
             for key, value in req.form.items():
+                if key in ['scheduler', 'is_running']:
+                    continue
                 logger.debug('Key:%s Value:%s', key, value)
                 entity = db.session.query(ModelSetting).filter_by(key=key).with_for_update().first()
                 entity.value = value
