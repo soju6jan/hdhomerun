@@ -20,6 +20,7 @@ from .logic import Logic
 # 로그
 #########################################################
 class LogicHDHomerun(object):
+    
     @staticmethod
     def load_data():
         try:
