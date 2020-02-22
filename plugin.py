@@ -16,6 +16,7 @@ from flask_socketio import SocketIO, emit, send
 from framework.logger import get_logger
 from framework import app, db, scheduler, socketio
 from framework.util import Util, AlchemyEncoder
+from system.model import ModelSetting as SystemModelSetting
 
 # 로그
 package_name = __name__.split('.')[0]
@@ -69,8 +70,7 @@ def first_menu(sub):
     if sub == 'setting':
         try:
             arg = ModelSetting.to_dict()
-            import system
-            ddns = system.ModelSetting.get('ddns')
+            ddns = SystemModelSetting.get('ddns')
             arg['m3u'] = '%s/%s/api/m3u' % (ddns, package_name)
             arg['xmltv'] = '%s/epg/xml/%s' % (ddns, package_name)
             arg['proxy'] = '%s/%s/proxy' % (ddns, package_name)
@@ -214,8 +214,7 @@ def proxy(sub):
     # 설정 저장
     if sub == 'discover.json':
         try:
-            import system
-            ddns = system.SystemLogic.get_setting_value('ddns')
+            ddns = SystemModelSetting.get('ddns')
             data = {"FriendlyName":"HDHomeRun CONNECT","ModelNumber":"HDHR4-2US","FirmwareName":"hdhomerun4_atsc","FirmwareVersion":"20190621","DeviceID":"104E8010","DeviceAuth":"UF4CFfWQh05c3jROcArmAZaf","BaseURL":"%s/hdhomerun/proxy" % ddns,"LineupURL":"%s/hdhomerun/proxy/lineup.json" % ddns,"TunerCount":20}
             return jsonify(data)
         except Exception as e: 
@@ -232,8 +231,7 @@ def proxy(sub):
         try:
             lineup = []
             channel_list = LogicHDHomerun.channel_list(only_use=True)
-            import system
-            ddns = system.SystemLogic.get_setting_value('ddns')
+            ddns = SystemModelSetting.get('ddns')
             for c in channel_list:
                 lineup.append({'GuideNumber': str(c.ch_number), 'GuideName': c.scan_name, 'URL': c.url})
             return jsonify(lineup)
