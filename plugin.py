@@ -14,7 +14,7 @@ from flask_socketio import SocketIO, emit, send
 
 # sjva 공용
 from framework.logger import get_logger
-from framework import app, db, scheduler, socketio
+from framework import app, db, scheduler, socketio, check_api
 from framework.util import Util, AlchemyEncoder
 from system.model import ModelSetting as SystemModelSetting
 
@@ -96,6 +96,7 @@ def first_menu(sub):
 # For UI                                                            
 #########################################################
 @blueprint.route('/ajax/<sub>', methods=['GET', 'POST'])
+@login_required
 def ajax(sub):
     logger.debug('%s AJAX sub:%s', package_name, sub)
     try:     
@@ -197,6 +198,7 @@ def ajax(sub):
 # API
 #########################################################
 @blueprint.route('/api/<sub>', methods=['GET', 'POST'])
+@check_api
 def api(sub):
     if sub == 'm3u':
         try:
