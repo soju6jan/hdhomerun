@@ -182,7 +182,7 @@ class ModelHDHomerunChannel(db.Model):
     def match_epg(self):
         try:
             import epg
-            ret = epg.Logic.get_match_name(self.for_epg_name)
+            ret = epg.ModelEpgMakerChannel.get_match_name(self.for_epg_name)
             if ret is not None:
                 self.match_epg_name = ret[0]
                 self.group_name = ret[1]
