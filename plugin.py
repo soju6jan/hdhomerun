@@ -72,8 +72,12 @@ def first_menu(sub):
             arg = ModelSetting.to_dict()
             ddns = SystemModelSetting.get('ddns')
             arg['m3u'] = '%s/%s/api/m3u' % (ddns, package_name)
-            arg['xmltv'] = '%s/epg/xml/%s' % (ddns, package_name)
+            arg['xmltv'] = '%s/epg/api/%s' % (ddns, package_name)
             arg['proxy'] = '%s/%s/proxy' % (ddns, package_name)
+            if SystemModelSetting.get_bool('auth_use_apikey'):
+                apikey = SystemModelSetting.get('auth_apikey')
+                arg['m3u'] += '?apikey={apikey}'.format(apikey=apikey)
+                arg['xmltv'] += '?apikey={apikey}'.format(apikey=apikey)
             return render_template('%s_%s.html' % (package_name, sub), arg=arg)
         except Exception as e: 
             logger.error('Exception:%s', e)
