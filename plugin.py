@@ -185,7 +185,10 @@ def ajax(sub):
             try:
                 deviceid = request.form['deviceid']
                 tmp = deviceid.find('192')
-                deviceid = deviceid[tmp:]
+                if tmp != -1:
+                    deviceid = deviceid[tmp:]
+                else:
+                    deviceid = deviceid.lower().replace('https://', '').replace('http://', '')
                 ModelSetting.set('deviceid', deviceid)
                 ret = LogicHDHomerun.ip_fix(deviceid)
                 return jsonify(ret)
