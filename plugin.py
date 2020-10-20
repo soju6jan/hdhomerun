@@ -37,20 +37,20 @@ def plugin_unload():
 
 plugin_info = {
     'version' : '0.1.0.0',
-    'name' : 'HDHomerun',
+    'name' : u'HDHomerun',
     'category_name' : 'tv',
     'icon' : '',
     'developer' : 'soju6jan',
-    'description' : 'TVH 없이 HDHomerun을 이용할 수 있는 플러그인',
+    'description' : u'TVH 없이 HDHomerun을 이용할 수 있는 플러그인',
     'home' : 'https://github.com/soju6jan/hdhomerun',
     'more' : '',
 }
 #########################################################
 
 menu = {
-    'main' : [package_name, 'HDHomerun'],
+    'main' : [package_name, u'HDHomerun'],
     'sub' : [
-        ['setting', '설정'], ['channel', '채널'], ['log', '로그']
+        ['setting', u'설정'], ['channel', u'채널'], ['log', u'로그']
     ],
     'category' : 'tv',
 }
