@@ -292,7 +292,8 @@ def trans_ts():
         logger.debug('command : %s', ffmpeg_command)
         process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
         global process_list
-        process_list.append(process)
+        #process_list.append(process)
+        #ix = len(process_list)-1
 
         while True:
             line = process.stdout.read(1024)
@@ -308,5 +309,5 @@ def trans_ts():
                 if process.returncode > 0:
                     logger.debug('FFmpeg Error :%s', process.returncode)
                 break
-        del process_list[process]
+        #del process_list[process]
     return Response(stream_with_context(generate()), mimetype = "video/MP2T")
