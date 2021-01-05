@@ -4,17 +4,17 @@
 import os
 import traceback
 import logging
-import json
-
+import json, time
+import subprocess
 # third-party
 import requests
-from flask import Blueprint, request, Response, send_file, render_template, redirect, jsonify
+from flask import Blueprint, request, Response, send_file, render_template, redirect, jsonify, stream_with_context
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_socketio import SocketIO, emit, send
 
 # sjva 공용
 from framework.logger import get_logger
-from framework import app, db, scheduler, socketio, check_api
+from framework import app, db, scheduler, socketio, check_api, py_urllib
 from framework.util import Util, AlchemyEncoder
 from system.model import ModelSetting as SystemModelSetting
 
@@ -32,8 +32,28 @@ blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_na
 def plugin_load():
     Logic.plugin_load()
 
+process_list = []
 def plugin_unload():
-    Logic.plugin_unload()
+    try:
+        #logger.debug('plugin_unload:%s', package_name)
+        Logic.plugin_unload()
+        global process_list
+        try:
+            for p in process_list:
+                if p is not None and p.poll() is None:
+                    import psutil
+                    process = psutil.Process(p.pid)
+                    for proc in process.children(recursive=True):
+                        proc.kill()
+                    process.kill()
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+    except Exception as e: 
+        logger.error('Exception:%s', e)
+        logger.error(traceback.format_exc())
+
 
 plugin_info = {
     'version' : '0.1.0.0',
@@ -71,13 +91,10 @@ def first_menu(sub):
         try:
             arg = ModelSetting.to_dict()
             ddns = SystemModelSetting.get('ddns')
-            arg['m3u'] = '%s/%s/api/m3u' % (ddns, package_name)
-            arg['xmltv'] = '%s/epg/api/%s' % (ddns, package_name)
+            arg['m3u'] = SystemModelSetting.make_apikey('{ddns}/%s/api/m3u' % (package_name))
+            arg['trans_m3u'] = SystemModelSetting.make_apikey('{ddns}/%s/api/trans_m3u' % package_name)
+            arg['xmltv'] = SystemModelSetting.make_apikey('{ddns}/epg/api/%s' % package_name)
             arg['proxy'] = '%s/%s/proxy' % (ddns, package_name)
-            if SystemModelSetting.get_bool('auth_use_apikey'):
-                apikey = SystemModelSetting.get('auth_apikey')
-                arg['m3u'] += '?apikey={apikey}'.format(apikey=apikey)
-                arg['xmltv'] += '?apikey={apikey}'.format(apikey=apikey)
             return render_template('%s_%s.html' % (package_name, sub), arg=arg)
         except Exception as e: 
             logger.error('Exception:%s', e)
@@ -213,6 +230,12 @@ def api(sub):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
+    elif sub == 'trans_m3u':
+        try:
+            return LogicHDHomerun.get_m3u(trans=True)
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
 
 #########################################################
 # Proxy
@@ -247,3 +270,43 @@ def proxy(sub):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
+
+
+@blueprint.route('/trans.ts', methods=['GET'])
+def trans_ts():
+    
+
+    def generate():
+        option = ModelSetting.get('trans_option').strip().split(' ')
+        source = request.args.get('source')
+        source = py_urllib.unquote(source)
+        logger.debug(source)
+
+        startTime = time.time()
+        buffer = []
+        sentBurst = False
+        
+        ffmpeg_command = ['ffmpeg', "-loglevel", "quiet", "-i", source] + option
+        #, '-vcodec', 'libx264, "-c:a", "aac", "-b:a", "128k", "-f", "mpegts", "-tune", "zerolatency", "pipe:stdout"]
+
+        logger.debug('command : %s', ffmpeg_command)
+        process = subprocess.Popen(ffmpeg_command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = -1)
+        global process_list
+        process_list.append(process)
+
+        while True:
+            line = process.stdout.read(1024)
+            buffer.append(line)
+            if sentBurst is False and time.time() > startTime + 1 and len(buffer) > 0:
+                sentBurst = True
+                for i in range(0, len(buffer) - 2):
+                    yield buffer.pop(0)
+            elif time.time() > startTime + 1 and len(buffer) > 0:
+                yield buffer.pop(0)
+            process.poll()
+            if isinstance(process.returncode, int):
+                if process.returncode > 0:
+                    logger.debug('FFmpeg Error :%s', process.returncode)
+                break
+
+    return Response(stream_with_context(generate()), mimetype = "video/MP2T")

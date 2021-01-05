@@ -9,7 +9,7 @@ import json
 from flask import Blueprint, request, Response, send_file, render_template, redirect, jsonify
 
 # sjva 공용
-from framework import app, db, scheduler, path_data, celery
+from framework import app, db, scheduler, path_data, celery, SystemModelSetting, py_urllib
 
 # 패키지
 from .plugin import package_name, logger
@@ -188,21 +188,24 @@ class LogicHDHomerun(object):
 
 
     @staticmethod
-    def get_m3u():
+    def get_m3u(trans=False):
         try:
             M3U_FORMAT = '#EXTINF:-1 tvg-id=\"%s\" tvg-name=\"%s\" tvg-chno=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n'
 
             m3u = '#EXTM3U\n'
             data = LogicHDHomerun.channel_list(only_use=True)
+            ddns = SystemModelSetting.get('ddns')
             for c in data:
                 try:
                     import epg
                     ins = epg.ModelEpgMakerChannel.get_instance_by_name(c.match_epg_name)
                 except:
                     ins = None
-
                 #m3u += M3U_FORMAT % (c.source+'|' + c.source_id, c.title, c.epg_entity.icon, c.source, c.title, url)
-                m3u += M3U_FORMAT % (c.id, c.scan_name, c.ch_number, (ins.icon if ins is not None else ""), c.group_name, c.scan_name, c.url)
+                url = c.url
+                if trans:
+                    url = ddns + '/hdhomerun/trans.ts?source=' + py_urllib.quote_plus(url)
+                m3u += M3U_FORMAT % (c.id, c.scan_name, c.ch_number, (ins.icon if ins is not None else ""), c.group_name, c.scan_name, url)
             
         except Exception as e: 
             logger.error('Exception:%s', e)
