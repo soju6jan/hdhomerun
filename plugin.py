@@ -308,5 +308,5 @@ def trans_ts():
                 if process.returncode > 0:
                     logger.debug('FFmpeg Error :%s', process.returncode)
                 break
-
+        del process_list[process]
     return Response(stream_with_context(generate()), mimetype = "video/MP2T")
