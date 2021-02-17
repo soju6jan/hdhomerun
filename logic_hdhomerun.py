@@ -45,7 +45,7 @@ class LogicHDHomerun(object):
                     m = ModelHDHomerunChannel()
                     m.init_data(item)
                     db.session.add(m)
-                    m.set_url(deviceid)
+                    m.set_url(deviceid, ModelSetting.get_bool('attach_mpeg_ext'), ModelSetting.get('tuner_name'))
                     channel_list.append(m)
                 no = 1
                 for m in channel_list:
@@ -129,7 +129,7 @@ class LogicHDHomerun(object):
                         mc.use = True if value == 'True' else False
                     if tmp[0] == 'use_vid_checkbox':
                         mc.use_vid = True if value == 'True' else False
-                        mc.set_url(deviceid)
+                        mc.set_url(deviceid, ModelSetting.get_bool('attach_mpeg_ext'), ModelSetting.get('tuner_name'))
                     if tmp[0] == 'ch_number':
                         mc.ch_number = int(value)
                     if tmp[0] == 'scan_name':
@@ -218,7 +218,7 @@ class LogicHDHomerun(object):
         try:
             data = LogicHDHomerun.channel_list()
             for c in data:
-                c.set_url(deviceid)
+                c.set_url(deviceid, ModelSetting.get_bool('attach_mpeg_ext'), ModelSetting.get('tuner_name'))
             db.session.commit()
             return True
         except Exception as e: 

@@ -28,6 +28,8 @@ class Logic(object):
         'group_sort' : u'TOP, 지상파, 종합편성, 뉴스/경제, 스포츠, 영화, 연예/오락, 드라마, 다큐, 교양, 음악, 레저, 만화, 어린이, 교육, 여성/패션, 공공, 종교, 홈쇼핑, 해외위성, 라디오, 기타',
         'deviceid' : '', 
         'trans_option' : '-c:v copy -c:a aac -b:a 128k -f mpegts -tune zerolatency pipe:stdout',
+        'attach_mpeg_ext' : 'True',
+        'tuner_name' : 'auto',
     }
     
 

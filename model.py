@@ -164,11 +164,13 @@ class ModelHDHomerunChannel(db.Model):
                 break
         self.match_epg()
 
-    def set_url(self, deviceid):
+    def set_url(self, deviceid, attach_mpeg_ext, tuner_name):
         if self.use_vid:
-            self.url = 'http://%s:5004/auto/v%s' % (deviceid, self.scan_vid)
+            self.url = 'http://%s:5004/%s/v%s' % (deviceid, tuner_name, self.scan_vid)
         else:
-            self.url = 'http://%s:5004/auto/ch%s-%s.mpeg' % (deviceid, self.scan_frequency, self.scan_program)
+            self.url = 'http://%s:5004/%s/ch%s-%s' % (deviceid, tuner_name, self.scan_frequency, self.scan_program)
+            if attach_mpeg_ext:
+                self.url += '.mpeg'
 
     def as_dict(self):
         ret = {x.name: getattr(self, x.name) for x in self.__table__.columns}

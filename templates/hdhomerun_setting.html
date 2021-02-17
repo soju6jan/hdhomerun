@@ -1,21 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 <div>
-  <form id='setting' name='setting'>
-  {{ macros.setting_input_text_and_buttons('data_filename', 'Date File', [['read_data_btn', 'View']], value=arg['data_filename'], desc=['HDHomerun Scan 툴에서 생성한 파일 위치.']) }}
-  {{ macros.setting_input_textarea('group_sort', '그룹 정렬 순서', value=arg['group_sort'], desc=['그룹별 정렬 순서']) }}
-  <!--{{ macros.setting_input_textarea('trans_option', '트랜스코딩 옵션', value=arg['trans_option'], desc=None) }}-->
+  {{ macros.m_button_group([['global_setting_save_btn', '설정 저장']])}}
+  {{ macros.m_row_start('5') }}
+  {{ macros.m_row_end() }}
+  <nav>  
+    {{ macros.m_tab_head_start() }}
+      {{ macros.m_tab_head2('normal', '일반', true) }}
+      {{ macros.m_tab_head2('etc', 'API', false) }}
+    {{ macros.m_tab_head_end() }}
+  </nav>
 
-  {{ macros.setting_button([['global_setting_save_btn', '저장']]) }}
+  <form id='setting' name='setting'>
+  <div class="tab-content" id="nav-tabContent">
+    {{ macros.m_tab_content_start('normal', true) }}
+      {{ macros.setting_input_text_and_buttons('data_filename', 'Date File', [['read_data_btn', 'View']], value=arg['data_filename'], desc=['HDHomerun Scan 툴에서 생성한 파일 위치.']) }}
+      {{ macros.setting_input_textarea('group_sort', '그룹 정렬 순서', value=arg['group_sort'], desc=['그룹별 정렬 순서']) }}
+      <!--{{ macros.setting_input_textarea('trans_option', '트랜스코딩 옵션', value=arg['trans_option'], desc=None) }}-->
+      {{ macros.setting_checkbox('attach_mpeg_ext', '.mpeg 붙이기', value=arg['attach_mpeg_ext'], desc=['최신 펌웨어부터는 .mpeg 확장자가 있으면 안됨.', 'On : 구형 펌웨어', 'Off : 최신 펌웨어']) }}
+      {{ macros.setting_input_text('tuner_name', '튜너 이름', value=arg['tuner_name'], desc=['auto 인 경우 자동선택. 특정 튜너만 동작시킬 경우 tuner01, tuner02 와 같이 입력']) }}
+      {{ macros.m_hr() }}
+      {{ macros.setting_input_text_and_buttons('deviceid', 'IP', [['ip_fix_btn', 'IP 변경']], value=arg['deviceid']) }}
+    {{ macros.m_tab_content_end() }}
+
+    {{ macros.m_tab_content_start('etc', false) }}
+      {{ macros.info_text_go('m3u', 'M3U', value=arg['m3u'], desc=['HDHomerun 채널에 대한 M3U']) }}
+      <!--{{ macros.info_text_go('trans_m3u', 'Trans M3U', value=arg['trans_m3u'], desc=['HDHomerun 채널에 대한 M3U. 트랜스코딩']) }}-->
+      {{ macros.info_text_go('xmltv', 'XMLTV', value=arg['xmltv'], desc=['HDHomerun EPG']) }}
+      {{ macros.info_text_go('proxy', 'PLEX DVR', value=arg['proxy'], desc=['PLEX DVR']) }}
+    {{ macros.m_tab_content_end() }}
+  </div><!--tab-content-->
   </form>
-  {{ macros.setting_input_text_and_buttons('deviceid', 'IP', [['ip_fix_btn', 'IP 변경']], value=arg['deviceid']) }}
-  
-  {{ macros.m_hr() }}
-  {{ macros.info_text_go('m3u', 'M3U', value=arg['m3u'], desc=['HDHomerun 채널에 대한 M3U']) }}
-  <!--{{ macros.info_text_go('trans_m3u', 'Trans M3U', value=arg['trans_m3u'], desc=['HDHomerun 채널에 대한 M3U. 트랜스코딩']) }}-->
-  {{ macros.info_text_go('xmltv', 'XMLTV', value=arg['xmltv'], desc=['HDHomerun EPG']) }}
-  {{ macros.info_text_go('proxy', 'PLEX DVR', value=arg['proxy'], desc=['PLEX DVR']) }}
-</div> <!--전체-->
+</div><!--전체-->
 
 <script type="text/javascript">
 var package_name = 'hdhomerun';
