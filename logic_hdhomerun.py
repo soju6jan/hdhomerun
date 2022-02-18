@@ -205,7 +205,7 @@ class LogicHDHomerun(object):
                 url = c.url
                 if trans:
                     url = ddns + '/hdhomerun/trans.ts?source=' + py_urllib.quote_plus(url)
-                m3u += M3U_FORMAT % (c.id, c.scan_name, c.ch_number, (ins.logo if ins is not None else ""), c.group_name, c.scan_name, url)
+                m3u += M3U_FORMAT % (c.id, c.scan_name, c.ch_number, (ins.icon if ins is not None else ""), c.group_name, c.scan_name, url)
             
         except Exception as e: 
             logger.error('Exception:%s', e)
