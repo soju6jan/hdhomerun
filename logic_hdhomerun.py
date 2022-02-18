@@ -197,15 +197,15 @@ class LogicHDHomerun(object):
             ddns = SystemModelSetting.get('ddns')
             for c in data:
                 try:
-                    import epg
-                    ins = epg.ModelEpgMakerChannel.get_instance_by_name(c.match_epg_name)
+                    import epg2
+                    ins = epg2.ModelEpg2Channel.get_by_name(c.match_epg_name)
                 except:
                     ins = None
                 #m3u += M3U_FORMAT % (c.source+'|' + c.source_id, c.title, c.epg_entity.icon, c.source, c.title, url)
                 url = c.url
                 if trans:
                     url = ddns + '/hdhomerun/trans.ts?source=' + py_urllib.quote_plus(url)
-                m3u += M3U_FORMAT % (c.id, c.scan_name, c.ch_number, (ins.icon if ins is not None else ""), c.group_name, c.scan_name, url)
+                m3u += M3U_FORMAT % (c.id, c.scan_name, c.ch_number, (ins.logo if ins is not None else ""), c.group_name, c.scan_name, url)
             
         except Exception as e: 
             logger.error('Exception:%s', e)

@@ -183,11 +183,11 @@ class ModelHDHomerunChannel(db.Model):
 
     def match_epg(self):
         try:
-            import epg
-            ret = epg.ModelEpgMakerChannel.get_match_name(self.for_epg_name)
+            import epg2
+            ret = epg2.ModelEpg2Channel.get_by_prefer(self.for_epg_name)
             if ret is not None:
-                self.match_epg_name = ret[0]
-                self.group_name = ret[1]
+                self.match_epg_name = ret.name
+                self.group_name = ret.category
                 return True
         except Exception as e: 
             logger.error('Exception:%s', e)

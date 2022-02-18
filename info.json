@@ -1,1 +1,11 @@
-{"more": "", "version": "0.1.0.0", "name": "HDHomerun", "developer": "soju6jan", "home": "https://github.com/soju6jan/hdhomerun", "description": "TVH \uc5c6\uc774 HDHomerun\uc744 \uc774\uc6a9\ud560 \uc218 \uc788\ub294 \ud50c\ub7ec\uadf8\uc778", "icon": "", "category_name": "tv"}
+{
+    "version": "0.1.0.0",
+    "name": "HDHomerun",
+    "category_name": "tv",
+    "icon": "",
+    "developer": "soju6jan",
+    "description": "TVH 없이 HDHomerun을 이용할 수 있는 플러그인",
+    "home": "https://github.com/soju6jan/hdhomerun",
+    "more": "",
+    "category": "tv"
+}
