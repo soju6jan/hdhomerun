@@ -28,7 +28,7 @@ class LogicHDHomerun(object):
             data = CommonUtil.read_file(ModelSetting.get('data_filename'))
             ret = {}
             if data is not None:
-                data = data.split('\n')
+                data = data.splitlines()
                 deviceid = data[0].strip()
                 tmp = deviceid.find('192')
                 deviceid = deviceid[tmp:]

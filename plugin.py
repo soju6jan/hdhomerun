@@ -134,7 +134,7 @@ def ajax(sub):
                 data_filename = request.form['data_filename']
                 import framework.common.util as CommonUtil
                 ret = CommonUtil.read_file(data_filename)
-                return jsonify(ret.split('\n'))
+                return jsonify(ret.splitlines())
             except Exception as e: 
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
