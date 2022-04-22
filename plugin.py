@@ -93,7 +93,7 @@ def first_menu(sub):
             ddns = SystemModelSetting.get('ddns')
             arg['m3u'] = SystemModelSetting.make_apikey('{ddns}/%s/api/m3u' % (package_name))
             arg['trans_m3u'] = SystemModelSetting.make_apikey('{ddns}/%s/api/trans_m3u' % package_name)
-            arg['xmltv'] = SystemModelSetting.make_apikey('{ddns}/epg/api/%s' % package_name)
+            arg['xmltv'] = SystemModelSetting.make_apikey('{ddns}/epg2/api/user/%s' % package_name)
             arg['proxy'] = '%s/%s/proxy' % (ddns, package_name)
             return render_template('%s_%s.html' % (package_name, sub), arg=arg)
         except Exception as e: 
